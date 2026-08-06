@@ -7,8 +7,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./styleai:/workspace/styleai
+      - ./styleai:/workspace/styleai:delegated
       - flutter_pub_cache:/root/.pub-cache
+      - flutter_build:/workspace/styleai/build
+      - flutter_dart_tool:/workspace/styleai/.dart_tool
     working_dir: /workspace/styleai
     stdin_open: true
     tty: true
@@ -18,3 +20,5 @@ services:
 
 volumes:
   flutter_pub_cache:
+  flutter_build:
+  flutter_dart_tool:
