@@ -1,0 +1,18 @@
+services:
+  styleai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: styleai_flutter_app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./styleai:/workspace/styleai
+      - flutter_pub_cache:/root/.pub-cache
+    working_dir: /workspace/styleai
+    command: >
+      bash -c "flutter pub get &&
+      flutter run -d web-server --web-hostname 0.0.0.0 --web-port 3000"
+
+volumes:
+  flutter_pub_cache:

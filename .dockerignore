@@ -1,0 +1,14 @@
+.git
+.gitignore
+README.md
+
+styleai/build
+styleai/.dart_tool
+styleai/.idea
+styleai/.vscode
+styleai/android/.gradle
+styleai/ios/Pods
+styleai/ios/.symlinks
+
+.DS_Store
+*.log
