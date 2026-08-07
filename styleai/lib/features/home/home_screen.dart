@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:styleai/core/theme/app_theme.dart';
+import 'package:dio/dio.dart';
 
-// 1 - Mostra sul testo del bottone il file selezionato
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +13,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? _selectedFileName;
+  PlatformFile? _selectedFile;
+  String? _durationText;
 
   Future<void> pickFile() async {
     FilePickerResult? result =
@@ -22,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'mp3',
         'wav',
       ],
+      withData: true,
     );
 
     if (result != null) {
@@ -29,12 +32,54 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         _selectedFileName = file.name;
+        _selectedFile = file;
+        _durationText = null;
       });
     } else {
       // L'utente ha annullato
       print("Nessun file selezionato");
     }
   }
+
+  Future<void> startProcess() async {
+    if (_selectedFile == null) {
+      return;
+    }
+
+    if (_selectedFile!.bytes == null) {
+      return;
+    }
+
+    try {
+      final dio = Dio();
+
+      final formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(
+        _selectedFile!.bytes!,
+        filename: _selectedFile!.name,
+      ),
+      });
+
+      final response = await dio.post(
+        'http://localhost:8000/songs/analyze',
+        data: formData,
+        options: Options(
+        contentType: 'multipart/form-data',
+      ),
+      );
+
+      final duration = response.data['duration'];
+
+      setState(() {
+        _durationText = duration['formatted'];
+      });
+
+      //USARE DURATION PER MOSTRARLO IN UN DIV
+    } catch (e) {
+    print("Errore durante la chiamata al backend:");
+    print(e);
+    }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
             Text(
-                  'Importa un file!',
+                  'Seleziona un file audio per analizzarlo',
                   style: TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 24,
@@ -73,6 +118,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 _selectedFileName ?? "Importa file",
               ),
             ),
+            if (_selectedFileName != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: startProcess,
+                child: const Text("Avvia"),
+              ),
+            ],
+            if (_durationText != null) ...[
+              const SizedBox(height: 16),
+              Text("Il file ha durata: ${_durationText!}"),
+            ]
               ],
             ),
           ),
