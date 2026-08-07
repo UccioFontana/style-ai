@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:styleai/core/theme/app_theme.dart';
 import 'package:styleai/features/home/analyze.dart';
-import 'package:styleai/features/home/library.dart';
+import 'package:styleai/features/home/home_screen.dart';
 import 'package:styleai/features/home/main_menu.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class LibraryScreen extends StatelessWidget {
+  const LibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +14,10 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Titolo
             const Padding(
               padding: EdgeInsets.only(top: 24),
               child: Text(
-                'STYLE AI',
+                'LIBRARY',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32,
@@ -26,23 +25,26 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Parte centrale
             Expanded(
               child: Center(
                 child: Text(
-                  'Benvenuto in STYLE AI!',
-                  style: TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  'La tua libreria è vuota.',
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 24),
                 ),
               ),
             ),
-
             MainMenu(
-              onHome: () {},
+              onHome: () {
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const HomeScreen(),
+                    transitionsBuilder: (_, animation, __, child) {
+                      return child;
+                    },
+                  ),
+                );
+              },
               onAnalyze: () {
                 Navigator.pushReplacement(
                   context,
@@ -54,18 +56,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               },
-              onLibrary: () {
-                Navigator.pushReplacement(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const LibraryScreen(),
-                    transitionsBuilder: (_, animation, __, child) {
-                      return child;
-                    },
-                  ),
-                );
-              },
-              activeDestination: MenuDestination.home,
+              onLibrary: () {},
+              activeDestination: MenuDestination.library,
             ),
           ],
         ),
