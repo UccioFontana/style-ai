@@ -2,17 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:styleai/core/theme/app_theme.dart';
 
-class HomeScreen extends StatelessWidget {
+// 1 - Mostra sul testo del bottone il file selezionato
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? _selectedFileName;
+
   Future<void> pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result =
+    await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        'mp3',
+        'wav',
+      ],
+    );
 
     if (result != null) {
       PlatformFile file = result.files.first;
 
-      print(file.name);
-      print(file.path);
+      setState(() {
+        _selectedFileName = file.name;
+      });
     } else {
       // L'utente ha annullato
       print("Nessun file selezionato");
@@ -53,7 +70,7 @@ class HomeScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: pickFile,
               child: Text(
-                "Importa file",
+                _selectedFileName ?? "Importa file",
               ),
             ),
               ],
