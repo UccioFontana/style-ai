@@ -3,3 +3,8 @@ uvicorn[standard]
 pydantic
 python-multipart
 mutagen
+numpy
+scipy
+soundfile
+pyloudnorm
+openai
