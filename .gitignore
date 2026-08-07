@@ -6,6 +6,7 @@
 .pub-cache/
 .pub/
 build/
+pubspec.lock
 
 # IDE
 .idea/
@@ -25,3 +26,4 @@ ios/Flutter/Flutter.podspec
 
 # Logs
 *.log
+styleai/pubspec.lock
