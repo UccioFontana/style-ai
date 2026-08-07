@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:styleai/core/theme/app_theme.dart';
-import 'package:styleai/features/home/analyze.dart';
+import 'package:styleai/features/analyze/analyze_screen.dart';
 import 'package:styleai/features/home/library.dart';
 import 'package:styleai/features/home/main_menu.dart';
 

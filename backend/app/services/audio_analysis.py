@@ -1,7 +1,3 @@
-import json
-import os
-import uuid
-
 import numpy as np
 import pyloudnorm as pyln
 import soundfile as sf
@@ -9,7 +5,6 @@ from fastapi import HTTPException
 from mutagen import File as MutagenFile
 from scipy.signal import resample_poly
 
-from app.services.mix_ai_review import generate_mix_ai_review
 
 def analyze_audio_file(file_path: str, original_filename: str) -> dict:
     metadata_audio = MutagenFile(file_path)
@@ -139,8 +134,7 @@ def analyze_audio_file(file_path: str, original_filename: str) -> dict:
         audio_format = audio_info.format
         audio_subtype = audio_info.subtype
 
-        subtype_to_bit_depth = {
-            "PCM_16": 16,
+        subtype_to_bit_depth = {            "PCM_16": 16,
             "PCM_24": 24,
             "PCM_32": 32,
             "FLOAT": 32,
@@ -152,17 +146,14 @@ def analyze_audio_file(file_path: str, original_filename: str) -> dict:
         pass
 
     technical_metrics = {
-        "loudness": {
-            "lufs_integrated": (
-                round(lufs_integrated, 2)
+        "loudness": {            "lufs_integrated": (                round(lufs_integrated, 2)
                 if lufs_integrated is not None and np.isfinite(lufs_integrated)
                 else None
             ),
             "lufs_short_term": lufs_short_term_values,
             "lufs_momentary": lufs_momentary_values,
         },
-        "peaks": {
-            "true_peak_dbtp": (
+        "peaks": {            "true_peak_dbtp": (
                 round(true_peak_dbtp, 2)
                 if true_peak_dbtp is not None and np.isfinite(true_peak_dbtp)
                 else None
@@ -205,8 +196,8 @@ def analyze_audio_file(file_path: str, original_filename: str) -> dict:
                 "total_seconds_float": round(duration_seconds_float, 3),
                 "formatted": f"{minutes}:{seconds:02d}",
             },
-            "sample_rate": sample_rate,
-            "channels": channels,
+            "sample_rate": int(sample_rate),
+            "channels": int(channels),
             "bit_depth": bit_depth,
             "format": audio_format,
             "subtype": audio_subtype,
@@ -228,21 +219,8 @@ def analyze_audio_file(file_path: str, original_filename: str) -> dict:
         },
     }
 
-    ai_mix_review = generate_mix_ai_review(
-        technical_metrics=technical_metrics,
-    )
+    return technical_metrics
 
-    result = {
-        "status": "completed",
-        "filename": original_filename,
-        "technical_metrics": technical_metrics,
-        "ai_mix_review": ai_mix_review,
-    }
-
-    json_file = save_analysis_json(result)
-    result["json_file"] = json_file
-
-    return result
 
 def calculate_window_loudness(
     audio: np.ndarray,
@@ -285,38 +263,3 @@ def calculate_window_loudness(
             continue
 
     return values
-
-def save_analysis_json(result: dict) -> dict:
-    output_dir = os.path.join(
-        "app",
-        "storage",
-        "analysis",
-    )
-
-    os.makedirs(
-        output_dir,
-        exist_ok=True,
-    )
-
-    json_filename = f"{uuid.uuid4()}_analysis.json"
-    json_file_path = os.path.join(
-        output_dir,
-        json_filename,
-    )
-
-    with open(
-        json_file_path,
-        "w",
-        encoding="utf-8",
-    ) as json_file:
-        json.dump(
-            result,
-            json_file,
-            indent=4,
-            ensure_ascii=False,
-        )
-
-    return {
-        "filename": json_filename,
-        "path": json_file_path,
-    }

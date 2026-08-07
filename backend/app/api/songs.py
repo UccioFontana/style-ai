@@ -3,10 +3,9 @@ import tempfile
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from app.services.audio_analysis import analyze_audio_file
+from app.services.complete_analysis import analyze_complete_audio_file
 
 router = APIRouter()
-
 
 @router.post("/analyze")
 async def analyze_song(file: UploadFile = File(...)):
@@ -43,7 +42,7 @@ async def analyze_song(file: UploadFile = File(...)):
             temp_file.write(content)
             temp_file_path = temp_file.name
 
-        result = analyze_audio_file(
+        result = analyze_complete_audio_file(
             file_path=temp_file_path,
             original_filename=filename,
         )
