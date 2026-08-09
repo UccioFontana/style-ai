@@ -7,6 +7,30 @@ import 'package:styleai/features/home/home_screen.dart';
 import 'package:styleai/features/home/library.dart';
 import 'package:styleai/features/home/main_menu.dart';
 
+enum Daws {
+  LogicPro,
+  AbletonLive,
+  FLStudio,
+  Cubase,
+  ProTools,
+  StudioOne,
+  Reaper,
+  GarageBand,
+  Reason,
+  BitwigStudio,
+  Cakewalk,
+  DigitalPerformer,
+  Sonar,
+  Tracktion,
+  Ardour,
+  Mixcraft,
+  Samplitude,
+  Nuendo,
+  Other,
+}
+
+Daws selectedDaw = Daws.LogicPro;
+
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({super.key});
 
@@ -57,7 +81,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     });
 
     try {
-      final responseData = await _api.analyzeFile(_selectedFile!);
+      final responseData = await _api.analyzeFile(_selectedFile!, selectedDaw.toString());
 
       if (!mounted) {
         return;
@@ -114,6 +138,9 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
+
+                  //MAIN COLUMN
+
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -126,19 +153,48 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                         ),
                       ),
                       const SizedBox(height: 80),
+
+                      //DESCRIPTION TEXT
+                      
                       Text(
-                        'Seleziona un file audio per analizzarlo',
+                        'Seleziona un file audio e la DAW per l\'analisi',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppTheme.textSecondary,
-                          fontSize: 24,
+                          fontSize: 20,
                         ),
                       ),
                       const SizedBox(height: 24),
+
+                      //IMPORT BUTTON
+
                       ElevatedButton(
                         onPressed: _isLoading ? null : pickFile,
                         child: Text(_selectedFileName ?? 'Importa file'),
                       ),
+                      const SizedBox(height: 16),
+
+                      // DROPDOWN DAW
+
+                      DropdownMenu<Daws>(
+                        initialSelection: selectedDaw,
+                        dropdownMenuEntries: Daws.values.map((daw){
+                          return DropdownMenuEntry<Daws>(
+                            value: daw,
+                            label: daw.name,
+                          );
+                        }).toList(),
+                        onSelected: (value) {
+                          if (value != null) {
+                            setState(() {
+                              selectedDaw = value;
+                            });
+                          }
+                        },
+                      ),
+
+                      // START BUTTON
+
                       if (_selectedFileName != null) ...[
                         const SizedBox(height: 16),
                         ElevatedButton(
