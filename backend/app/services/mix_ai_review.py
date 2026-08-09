@@ -29,10 +29,17 @@ def generate_mix_ai_review(analysis: dict) -> dict:
                     "role": "system",
                     "content": (
                         "Sei un senior mixing/mastering engineer. "
-                        "Stai valutando una produzione già finita, caricata dall'utente per ricevere un parere finale. "
-                        "Devi dare un giudizio professionale, strategico e utile: cosa funziona, cosa rischia di compromettere il risultato, "
-                        "e quali interventi pratici fare prima della release. "
-                        "Usa solo i dati forniti. Non inventare valori. Non essere generico. "
+                        "Stai valutando una produzione già finita, caricata dall'utente "
+                        "per ricevere un parere finale prima della release. "
+                        "Devi dare un giudizio professionale, strategico e utile: "
+                        "cosa funziona, cosa rischia di compromettere il risultato, "
+                        "e quali interventi pratici fare senza proporre rifacimenti "
+                        "completi se non strettamente necessario. "
+                        "Usa solo i dati forniti. Non inventare valori. "
+                        "Non essere generico. "
+                        "Il software indicato è solo un contesto operativo: "
+                        "prima dai il consiglio tecnico, poi suggerisci eventualmente "
+                        "strumenti compatibili. "
                         "Rispondi in italiano, in modo sintetico e operativo."
                     ),
                 },
@@ -60,6 +67,7 @@ def generate_mix_ai_review(analysis: dict) -> dict:
 def build_compact_analysis(analysis: dict) -> dict:
     technical = analysis.get("technical_metrics", {})
     frequency = analysis.get("frequency_analysis", {})
+    softwareType = analysis.get("softwareType", "None")
 
     loudness = technical.get("loudness", {})
     peaks = technical.get("peaks", {})
@@ -75,6 +83,10 @@ def build_compact_analysis(analysis: dict) -> dict:
 
     return {
         "filename": analysis.get("filename"),
+        "context": {
+            "softwareType": softwareType,
+            "software": get_software_context(softwareType),
+        },
         "technical": {
             "duration": audio_properties.get("duration", {}).get("formatted"),
             "sample_rate": audio_properties.get("sample_rate"),
@@ -121,7 +133,286 @@ def build_compact_bands(bands: dict) -> dict:
 
     return compact_bands
 
+def get_software_context(softwareType: str) -> dict:
+    contexts = {
+        "None": {
+            "label": "software non specificato",
+            "native_tools": {},
+            "notes": [
+                "Fornisci consigli DAW-agnostic.",
+                "Usa categorie generiche: EQ, EQ dinamica, compressore, multibanda, limiter, metering e gain staging.",
+                "Non nominare plugin specifici.",
+            ],
+        },
+        "LogicPro": {
+            "label": "Logic Pro",
+            "native_tools": {
+                "eq": ["Channel EQ", "Linear Phase EQ"],
+                "compression": ["Compressor"],
+                "multiband": ["Multipressor"],
+                "limiting": ["Limiter", "Adaptive Limiter"],
+                "metering": ["Loudness Meter"],
+            },
+            "notes": [
+                "Preferisci strumenti nativi solo se coerenti con il problema rilevato.",
+                "Non forzare un tool specifico se basta gain staging, EQ o ascolto comparativo.",
+            ],
+        },
+        "AbletonLive": {
+            "label": "Ableton Live",
+            "native_tools": {
+                "eq": ["EQ Eight"],
+                "utility": ["Utility"],
+                "compression": ["Compressor", "Glue Compressor"],
+                "multiband": ["Multiband Dynamics"],
+                "limiting": ["Limiter"],
+                "metering": ["Spectrum"],
+            },
+            "notes": [
+                "Usa tool nativi solo quando aiutano a tradurre meglio il consiglio tecnico.",
+                "Utility può essere utile per gain, mono compatibility e controllo del low-end.",
+            ],
+        },
+        "FLStudio": {
+            "label": "FL Studio",
+            "native_tools": {
+                "eq": ["Parametric EQ 2"],
+                "compression": ["Fruity Compressor"],
+                "multiband": ["Maximus"],
+                "limiting": ["Fruity Limiter"],
+                "metering": ["Wave Candy"],
+            },
+            "notes": [
+                "Usa strumenti nativi solo se coerenti con il problema rilevato.",
+                "Maximus è utile solo quando serve controllo multibanda, non come soluzione generica.",
+            ],
+        },
+        "Cubase": {
+            "label": "Cubase",
+            "native_tools": {
+                "eq": ["Frequency EQ"],
+                "compression": ["Compressor"],
+                "multiband": ["Multiband Compressor"],
+                "limiting": ["Limiter"],
+                "metering": ["SuperVision"],
+            },
+            "notes": [
+                "Frequency EQ può essere suggerito per interventi correttivi o dinamici se coerente con il problema.",
+                "SuperVision può essere usato per verificare loudness, spettro e fase.",
+            ],
+        },
+        "ProTools": {
+            "label": "Pro Tools",
+            "native_tools": {
+                "eq": ["EQ III"],
+                "compression": ["Dyn3 Compressor/Limiter"],
+                "gain": ["Clip Gain"],
+                "routing": ["Bus routing"],
+                "metering": ["Metering plugin"],
+            },
+            "notes": [
+                "Dai priorità a gain staging, clip gain e controllo sui bus quando il problema riguarda livelli o headroom.",
+                "Non forzare processing sul master se è più sensato intervenire sui bus.",
+            ],
+        },
+        "StudioOne": {
+            "label": "Studio One",
+            "native_tools": {
+                "eq": ["Pro EQ"],
+                "compression": ["Compressor"],
+                "multiband": ["Multiband Dynamics"],
+                "limiting": ["Limiter"],
+                "metering": ["Level Meter"],
+            },
+            "notes": [
+                "Preferisci tool nativi solo se coerenti con il dato analizzato.",
+                "Non suggerire processing pesante se il problema è risolvibile con gain staging o micro-correzioni.",
+            ],
+        },
+        "Reaper": {
+            "label": "REAPER",
+            "native_tools": {
+                "eq": ["ReaEQ"],
+                "compression": ["ReaComp"],
+                "multiband": ["ReaXcomp"],
+                "limiting": ["Limiter plugin"],
+                "metering": ["JS analyzers"],
+            },
+            "notes": [
+                "Suggerisci strumenti Rea solo se aiutano davvero a eseguire l'intervento tecnico.",
+                "Mantieni i consigli compatibili con un workflow flessibile e DAW-agnostic.",
+            ],
+        },
+        "GarageBand": {
+            "label": "GarageBand",
+            "native_tools": {
+                "eq": ["Visual EQ"],
+                "compression": ["Compressor"],
+                "limiting": ["Limiter"],
+                "metering": [],
+            },
+            "notes": [
+                "Dai consigli semplici e applicabili con strumenti essenziali.",
+                "Evita workflow troppo complessi o da mastering avanzato.",
+            ],
+        },
+        "Reason": {
+            "label": "Reason",
+            "native_tools": {
+                "eq": ["Channel EQ", "MClass Equalizer"],
+                "compression": ["MClass Compressor"],
+                "multiband": [],
+                "limiting": ["MClass Maximizer"],
+                "metering": ["Spectrum EQ", "meters"],
+            },
+            "notes": [
+                "Suggerisci interventi compatibili con rack e channel strip.",
+                "Preferisci correzioni mirate su sorgenti o bus prima del master.",
+            ],
+        },
+        "BitwigStudio": {
+            "label": "Bitwig Studio",
+            "native_tools": {
+                "eq": ["EQ+", "EQ-5"],
+                "compression": ["Compressor"],
+                "multiband": ["Multiband FX"],
+                "limiting": ["Peak Limiter"],
+                "metering": ["Spectrum Analyzer"],
+            },
+            "notes": [
+                "Usa strumenti modulari solo se realmente utili al problema rilevato.",
+                "Mantieni i consigli orientati a micro-correzioni finali.",
+            ],
+        },
+        "Cakewalk": {
+            "label": "Cakewalk",
+            "native_tools": {
+                "eq": ["ProChannel EQ"],
+                "compression": ["ProChannel Compressor"],
+                "multiband": [],
+                "limiting": ["Limiter"],
+                "metering": ["Metering tools"],
+            },
+            "notes": [
+                "Suggerisci interventi compatibili con ProChannel quando utile.",
+                "Dai priorità a EQ, gain staging e controllo del master bus.",
+            ],
+        },
+        "DigitalPerformer": {
+            "label": "Digital Performer",
+            "native_tools": {
+                "eq": ["MasterWorks EQ"],
+                "compression": ["MasterWorks Compressor"],
+                "multiband": [],
+                "limiting": ["MasterWorks Limiter"],
+                "metering": ["Metering tools"],
+            },
+            "notes": [
+                "Mantieni i consigli tecnici e non eccessivamente plugin-specific.",
+                "Suggerisci tool nativi solo se coerenti con il problema.",
+            ],
+        },
+        "Sonar": {
+            "label": "Sonar",
+            "native_tools": {
+                "eq": ["ProChannel EQ"],
+                "compression": ["ProChannel Compressor"],
+                "multiband": [],
+                "limiting": ["Limiter"],
+                "metering": ["Metering tools"],
+            },
+            "notes": [
+                "Suggerisci interventi compatibili con ProChannel quando utile.",
+                "Evita consigli troppo legati a plugin esterni.",
+            ],
+        },
+        "Tracktion": {
+            "label": "Tracktion",
+            "native_tools": {
+                "eq": ["EQ"],
+                "compression": ["Compressor"],
+                "multiband": [],
+                "limiting": ["Limiter"],
+                "metering": ["Metering tools"],
+            },
+            "notes": [
+                "Dai consigli DAW-agnostic con riferimento a strumenti nativi generici.",
+                "Non forzare nomi di plugin se non necessari.",
+            ],
+        },
+        "Ardour": {
+            "label": "Ardour",
+            "native_tools": {
+                "eq": ["ACE EQ"],
+                "compression": ["ACE Compressor"],
+                "multiband": [],
+                "limiting": ["Limiter"],
+                "metering": ["Metering tools"],
+            },
+            "notes": [
+                "Mantieni i consigli compatibili con strumenti nativi o generici.",
+                "Non suggerire plugin commerciali esterni.",
+            ],
+        },
+        "Mixcraft": {
+            "label": "Mixcraft",
+            "native_tools": {
+                "eq": ["EQ"],
+                "compression": ["Compressor"],
+                "multiband": [],
+                "limiting": ["Limiter"],
+                "metering": ["Metering tools"],
+            },
+            "notes": [
+                "Dai consigli semplici, chiari e applicabili con strumenti standard.",
+                "Evita catene di mastering complesse.",
+            ],
+        },
+        "Samplitude": {
+            "label": "Samplitude",
+            "native_tools": {
+                "eq": ["Equalizer"],
+                "compression": ["Compressor"],
+                "multiband": ["Multiband Dynamics"],
+                "limiting": ["Limiter"],
+                "metering": ["Metering tools"],
+            },
+            "notes": [
+                "Suggerisci interventi sul master o sugli oggetti audio solo se coerenti.",
+                "Mantieni il focus su correzioni finali mirate.",
+            ],
+        },
+        "Nuendo": {
+            "label": "Nuendo",
+            "native_tools": {
+                "eq": ["Frequency EQ"],
+                "compression": ["Compressor"],
+                "multiband": ["Multiband Compressor"],
+                "limiting": ["Limiter"],
+                "metering": ["SuperVision"],
+            },
+            "notes": [
+                "Nuendo condivide molti strumenti con Cubase: usa riferimenti compatibili.",
+                "Suggerisci tool nativi solo se coerenti con il dato analizzato.",
+            ],
+        },
+        "Other": {
+            "label": "software non specificato",
+            "native_tools": {},
+            "notes": [
+                "Fornisci consigli DAW-agnostic.",
+                "Usa categorie generiche: EQ, EQ dinamica, compressore, multibanda, limiter, metering e gain staging.",
+                "Non nominare plugin specifici.",
+            ],
+        },
+    }
+
+    return contexts.get(softwareType, contexts["Other"])
+
 def build_mix_review_prompt(compact_analysis: dict) -> str:
+    software = compact_analysis.get("context", {}).get("software", {})
+    software_label = software.get("label", "software non specificato")
+
     analysis_json = json.dumps(
         compact_analysis,
         indent=2,
@@ -131,39 +422,40 @@ def build_mix_review_prompt(compact_analysis: dict) -> str:
     return f"""
 Valuta questa produzione audio già finalizzata o quasi finalizzata.
 
-L'utente ha caricato il brano per capire se il mix/master è pronto, se ci sono rischi tecnici e quali interventi conviene fare prima della release.
+L'utente ha caricato il brano per capire se il mix/master è pronto, se ci sono rischi tecnici e quali micro-interventi conviene fare prima della release.
+
+Software indicato: {software_label}
+
+Il software è solo un contesto operativo.
+Non partire dal software: parti sempre dai dati audio.
+Se suggerisci un tool, deve essere coerente con context.software.native_tools.
+Se il software è non specificato, usa solo categorie generiche e non nominare plugin specifici.
 
 DATI:
 {analysis_json}
-
-Produci una review professionale, breve e strategica.
 
 Formato obbligatorio:
 
 ## Giudizio finale
 
-Scrivi 2-3 frasi.
-Devi dire chiaramente se il brano sembra:
+2-3 frasi massimo.
+Dì chiaramente se il brano sembra:
 - pronto;
 - quasi pronto con correzioni leggere;
 - da rivedere prima della release.
 
-Motiva il giudizio usando i dati principali.
+Motiva il giudizio con 2-3 dati reali.
 
 ## Evidenze tecniche
 
-Elenca 5-8 bullet point massimo.
+5-8 bullet point massimo.
 Ogni bullet deve contenere un dato numerico o uno status reale.
-Esempio:
-- True Peak: -0.3 dBTP, vicino al limite.
-- Low-end: 42.3%, quindi piuttosto dominante.
-- Clipping: assente.
+Non commentare ogni dato: seleziona solo quelli decisivi.
 
 ## Cosa funziona
 
 Massimo 3 bullet point.
-Indica solo aspetti positivi supportati dai dati.
-Non fare complimenti generici.
+Solo punti positivi supportati dai dati.
 
 ## Cosa sistemare
 
@@ -173,21 +465,23 @@ Per ogni punto indica:
 - dato che lo dimostra;
 - impatto sul risultato finale.
 
-## Interventi consigliati
+## Interventi consigliati in {software_label}
 
 Massimo 5 bullet point.
-Devono essere azioni pratiche da mixing/mastering engineer.
-Ogni consiglio deve dire dove intervenire e perché.
-Esempi:
-- Abbassa il limiter ceiling a -1.0 dBTP se il true peak è troppo vicino a 0.
-- Controlla 20-60 Hz su kick/basso se il sub è alto.
-- Usa EQ dinamica sul low-end se il basso domina solo in alcuni momenti.
-- Valuta un boost controllato tra 5-10 kHz se high/air sono bassi.
-- Verifica il mix su speaker piccoli se il low-end è dominante.
+Ogni bullet deve seguire questo schema:
+- Azione tecnica concreta.
+- Area/frequenza/processo su cui intervenire.
+- Motivo dell'intervento.
+- Eventuale tool compatibile dal context, solo se utile.
+
+Esempio di stile:
+- Controlla il sub tra 20-60 Hz sugli elementi che generano low-end, evitando tagli aggressivi sul master; se serve, usa un EQ nativo compatibile indicato nel context.
+- Se il true peak è vicino a 0 dBTP, abbassa il ceiling del limiter finale e ricontrolla loudness e headroom.
+- Se high/air sono bassi, valuta un'apertura controllata sulle sorgenti brillanti o sul bus, evitando boost generici sul master.
 
 ## Priorità prima della release
 
-Scrivi massimo 3 priorità numerate.
+Massimo 3 priorità numerate.
 Devono essere ordinate dalla più importante alla meno importante.
 
 Regole:
@@ -197,8 +491,11 @@ Regole:
 - Non essere didattico.
 - Non essere vago.
 - Non proporre dieci alternative.
+- Non inventare plugin, funzioni o strumenti non presenti nel context.
+- Non suggerire di cambiare DAW.
+- Non suggerire plugin esterni a pagamento.
+- Non proporre un remix completo se bastano correzioni da final check.
 - Non dire "potrebbe" in modo generico: se sei incerto, spiega perché.
 - Se la confidence è alta, sii diretto.
 - Se la confidence è media o bassa, segnala cautela.
-- Considera che l'utente ha già finito produzione, mix e master: dai consigli realistici da ultimo check, non da rifacimento completo.
 """

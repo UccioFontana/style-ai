@@ -9,6 +9,7 @@ from app.services.mix_ai_review import generate_mix_ai_review
 def analyze_complete_audio_file(
     file_path: str,
     original_filename: str,
+    softwareType: str = "other",
 ) -> dict:
     technical_metrics = analyze_audio_file(
         file_path=file_path,
@@ -23,6 +24,7 @@ def analyze_complete_audio_file(
     combined_analysis = {
         "status": "completed",
         "filename": original_filename,
+        "softwareType": softwareType,
         "technical_metrics": technical_metrics,
         "frequency_analysis": frequency_analysis,
     }
