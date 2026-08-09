@@ -8,6 +8,7 @@ import 'package:styleai/features/home/library.dart';
 import 'package:styleai/features/home/main_menu.dart';
 
 enum Daws {
+  None,
   LogicPro,
   AbletonLive,
   FLStudio,
@@ -29,7 +30,7 @@ enum Daws {
   Other,
 }
 
-Daws selectedDaw = Daws.LogicPro;
+Daws selectedDaw = Daws.None;
 
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({super.key});
