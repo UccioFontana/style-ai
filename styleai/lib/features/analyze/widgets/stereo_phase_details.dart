@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:styleai/core/theme/app_theme.dart';
 import 'package:styleai/features/analyze/utils/frequency_mapper.dart';
 
-class NerdDetails extends StatelessWidget {
+class StereoPhaseDetails extends StatelessWidget {
   final dynamic responseData;
 
-  const NerdDetails({
+  const StereoPhaseDetails({
     super.key,
     required this.responseData,
   });
@@ -24,7 +24,7 @@ class NerdDetails extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Dettagli tecnici avanzati',
+            'Informazioni stereo & fase',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppTheme.textPrimary,
@@ -34,48 +34,37 @@ class NerdDetails extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           _section(
-            title: 'Quality & Confidence',
-            child: _keyValueTable(qualityRows),
+            title: 'Meter globale',
+            child: Text(
+              'Inserire qui i dettagli sul meter globale estratti dall\'analisi audio.',
+            ),
           ),
           const SizedBox(height: 24),
           _section(
-            title: 'Frame analysis',
-            child: _keyValueTable(frameStatsRows),
+            title: 'Dettagli di fase',
+            child: Text(
+              'Inserire qui i dettagli di fase e le informazioni stereo estratte dall\'analisi audio.',
+            ),
           ),
           const SizedBox(height: 24),
           _section(
-            title: 'Percentili per banda',
-            child: _percentileTable(tonalRows),
+            title: 'Bilanciamento L/R e Mid/Side',
+            child: Text(
+              'Inserire qui le informazioni sul bilanciamento L/R e Mid/Side estratte dall\'analisi audio.',
+            ),
           ),
           const SizedBox(height: 24),
           _section(
-            title: 'Raw JSON',
-            child: ExpansionTile(
-              collapsedIconColor: AppTheme.textPrimary,
-              iconColor: AppTheme.textPrimary,
-              title: Text(
-                'Mostra risposta completa',
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  color: Colors.black.withOpacity(0.25),
-                  child: SelectableText(
-                    _prettyJson(responseData),
-                    style: TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 12,
-                      height: 1.4,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ),
-              ],
+            title: 'Rischio stereo nel low-end',
+            child: Text(
+              'Inserire qui le informazioni sul rischio stereo nel low-end estratte dall\'analisi audio.',
+            ),
+          ),
+          const SizedBox(height: 24),
+          _section(
+            title: 'Compatibilità mono',
+            child: Text(
+              'Inserire qui le informazioni sulla compatibilità mono estratte dall\'analisi audio.',
             ),
           ),
         ],

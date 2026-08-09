@@ -4,7 +4,7 @@ import 'package:styleai/features/analyze/utils/frequency_mapper.dart';
 import 'package:styleai/features/analyze/utils/metrics_mapper.dart';
 import 'package:styleai/features/analyze/widgets/ai_review_box.dart';
 import 'package:styleai/features/analyze/widgets/metrics_table.dart';
-import 'package:styleai/features/analyze/widgets/nerd_details.dart';
+import 'package:styleai/features/analyze/widgets/stereo_phase_details.dart';
 import 'package:styleai/features/analyze/widgets/overview_cards.dart';
 import 'package:styleai/features/analyze/widgets/tonal_balance_chart.dart';
 import 'package:styleai/features/analyze/widgets/tonal_balance_table.dart';
@@ -41,7 +41,7 @@ class AnalysisResultScreen extends StatelessWidget {
               Tab(text: 'AI Review'),
               Tab(text: 'Technical'),
               Tab(text: 'Tonal Balance'),
-              Tab(text: 'Nerd'),
+              Tab(text: 'Stereo & Phase'),
             ],
           ),
         ),
@@ -70,7 +70,7 @@ class AnalysisResultScreen extends StatelessWidget {
               ),
             ),
             _ResultTab(
-              child: NerdDetails(responseData: responseData),
+              child: StereoPhaseDetails(responseData: responseData),
             ),
           ],
         ),
