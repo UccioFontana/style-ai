@@ -82,7 +82,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     });
 
     try {
-      final responseData = await _api.analyzeFile(_selectedFile!, selectedDaw.toString());
+      final responseData = await _api.analyzeFile(_selectedFile!, selectedDaw.name);
 
       if (!mounted) {
         return;

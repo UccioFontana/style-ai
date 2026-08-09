@@ -1,14 +1,17 @@
 import os
 import tempfile
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.services.complete_analysis import analyze_complete_audio_file
 
 router = APIRouter()
 
 @router.post("/analyze")
-async def analyze_song(file: UploadFile = File(...)):
+async def analyze_song(
+    file: UploadFile = File(...),
+    softwareType: str = Form("other"),
+):
     allowed_content_types = [
         "audio/mpeg",
         "audio/mp3",
@@ -45,6 +48,7 @@ async def analyze_song(file: UploadFile = File(...)):
         result = analyze_complete_audio_file(
             file_path=temp_file_path,
             original_filename=filename,
+            softwareType=softwareType,
         )
 
         return result
