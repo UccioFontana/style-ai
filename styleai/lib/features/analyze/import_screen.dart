@@ -6,40 +6,18 @@ import 'package:styleai/features/analyze/services/audio_analysis_api.dart';
 import 'package:styleai/features/home/home_screen.dart';
 import 'package:styleai/features/home/library.dart';
 import 'package:styleai/features/home/main_menu.dart';
+import 'package:styleai/features/analyze/technical_input.dart';
 
-enum Daws {
-  None,
-  LogicPro,
-  AbletonLive,
-  FLStudio,
-  Cubase,
-  ProTools,
-  StudioOne,
-  Reaper,
-  GarageBand,
-  Reason,
-  BitwigStudio,
-  Cakewalk,
-  DigitalPerformer,
-  Sonar,
-  Tracktion,
-  Ardour,
-  Mixcraft,
-  Samplitude,
-  Nuendo,
-  Other,
-}
 
-Daws selectedDaw = Daws.None;
 
-class AnalyzeScreen extends StatefulWidget {
-  const AnalyzeScreen({super.key});
+class ImportScreen extends StatefulWidget {
+  const ImportScreen({super.key});
 
   @override
-  State<AnalyzeScreen> createState() => _AnalyzeScreenState();
+  State<ImportScreen> createState() => _ImportScreenState();
 }
 
-class _AnalyzeScreenState extends State<AnalyzeScreen> {
+class _ImportScreenState extends State<ImportScreen> {
   final AudioAnalysisApi _api = AudioAnalysisApi();
 
   String? _selectedFileName;
@@ -66,46 +44,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       _selectedFile = file;
       _errorMessage = null;
     });
-  }
-
-  Future<void> startProcess() async {
-    if (_selectedFile?.bytes == null) {
-      setState(() {
-        _errorMessage = 'Nessun file valido selezionato.';
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final responseData = await _api.analyzeFile(_selectedFile!, selectedDaw.name);
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AnalysisResultScreen(
-            responseData: responseData,
-          ),
-        ),
-      );
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = "Errore durante l'analisi del file.";
-      });
-    }
   }
 
   void _goToHome() {
@@ -146,7 +84,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'STYLE-AI',
+                        'STYLE AI',
                         style: TextStyle(
                           color: AppTheme.textPrimary,
                           fontSize: 32,
@@ -175,26 +113,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // DROPDOWN DAW
-
-                      DropdownMenu<Daws>(
-                        initialSelection: selectedDaw,
-                        dropdownMenuEntries: Daws.values.map((daw){
-                          return DropdownMenuEntry<Daws>(
-                            value: daw,
-                            label: daw.name,
-                          );
-                        }).toList(),
-                        onSelected: (value) {
-                          if (value != null) {
-                            setState(() {
-                              selectedDaw = value;
-                            });
-                          }
-                        },
-                      ),
-
-                      // START BUTTON
+                      // PROCEED BUTTON
 
                       if (_selectedFileName != null) ...[
                         const SizedBox(height: 16),
@@ -203,9 +122,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                           ),
-                          onPressed: _isLoading ? null : startProcess,
+                          //onPressed: _isLoading ? null : startProcess,
+                          onPressed: () {
+                            if (_selectedFile == null) return;
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => TechnicalInput(
+                                  selectedFile: _selectedFile!,
+                                ),
+                              ),
+                            );
+                          },
                           child: Text(
-                            _isLoading ? 'Analisi in corso...' : 'Avvia',
+                            _isLoading ? 'Caricamento...' : 'Prosegui',
                           ),
                         ),
                       ],

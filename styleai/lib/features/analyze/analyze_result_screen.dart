@@ -15,6 +15,7 @@ class AnalysisResultScreen extends StatelessWidget {
   const AnalysisResultScreen({
     super.key,
     required this.responseData,
+    
   });
 
   @override

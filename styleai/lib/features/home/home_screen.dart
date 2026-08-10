@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:styleai/core/theme/app_theme.dart';
-import 'package:styleai/features/analyze/analyze_screen.dart';
+import 'package:styleai/features/analyze/import_screen.dart';
 import 'package:styleai/features/home/library.dart';
 import 'package:styleai/features/home/main_menu.dart';
 
@@ -47,7 +47,7 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const AnalyzeScreen(),
+                    pageBuilder: (_, __, ___) => const ImportScreen(),
                     transitionsBuilder: (_, animation, __, child) {
                       return child;
                     },

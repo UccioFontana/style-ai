@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:styleai/core/config/api_config.dart';
 
 class AudioAnalysisApi {
@@ -13,14 +14,17 @@ class AudioAnalysisApi {
 
   Future<dynamic> analyzeFile(
     PlatformFile file,
-    String softwareType,
-  ) async {
+    String daw,
+    Map<String, double> feeling,
+  ) async { 
+    debugPrint('Feeling: ${feeling} DAW: ${daw}');
     final formData = FormData.fromMap({
       'file': MultipartFile.fromBytes(
         file.bytes!,
         filename: file.name,
       ),
-      'softwareType': softwareType,
+      'softwareType': daw,
+      'feeling': feeling
     });
 
     final response = await _dio.post(
