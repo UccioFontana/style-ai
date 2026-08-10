@@ -9,8 +9,16 @@ from app.services.mix_ai_review import generate_mix_ai_review
 def analyze_complete_audio_file(
     file_path: str,
     original_filename: str,
-    softwareType: str = "other",
+    softwareType: str = "None",
+    instruments: list[str] | None = None,
+    feeling: dict | None = None,
 ) -> dict:
+    if instruments is None:
+        instruments = []
+
+    if feeling is None:
+        feeling = {}
+
     technical_metrics = analyze_audio_file(
         file_path=file_path,
         original_filename=original_filename,
@@ -25,6 +33,8 @@ def analyze_complete_audio_file(
         "status": "completed",
         "filename": original_filename,
         "softwareType": softwareType,
+        "instruments": instruments,
+        "feeling": feeling,
         "technical_metrics": technical_metrics,
         "frequency_analysis": frequency_analysis,
     }

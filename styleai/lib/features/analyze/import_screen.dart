@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:styleai/core/theme/app_theme.dart';
 import 'package:styleai/features/analyze/analyze_result_screen.dart';
@@ -30,7 +31,7 @@ class _ImportScreenState extends State<ImportScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['mp3', 'wav'],
-      withData: true,
+      withData: kIsWeb,
     );
 
     if (result == null) {

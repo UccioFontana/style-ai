@@ -1,3 +1,6 @@
 class ApiConfig {
-  static const String baseUrl = 'http://192.168.1.42:8000';
+ static const String baseUrl = String.fromEnvironment(
+ 'API_BASE_URL',
+ defaultValue: 'http://localhost:8000',
+ );
 }

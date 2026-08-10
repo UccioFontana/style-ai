@@ -16,9 +16,14 @@ services:
     tty: true
     depends_on:
       - backend
+    environment:
+      - API_BASE_URL=http://localhost:8000
     command: >
       bash -c "flutter pub get &&
-      flutter run -d web-server --web-hostname 0.0.0.0 --web-port 3000"
+      flutter run -d web-server
+      --web-hostname 0.0.0.0
+      --web-port 3000
+      --dart-define=API_BASE_URL=$$API_BASE_URL"
 
   backend:
     build:

@@ -175,7 +175,7 @@ class _TechnicalInputState extends State<TechnicalInput> {
                 ),
                 const SizedBox(height: 40),
                 Padding(
-                  padding : const EdgeInsets.symmetric(horizontal: 100),
+                  padding : const EdgeInsets.symmetric(horizontal: 60),
                   child:  
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

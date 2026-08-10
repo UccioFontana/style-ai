@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:styleai/core/theme/app_theme.dart';
 import 'package:styleai/features/analyze/analyze_result_screen.dart';
@@ -37,61 +39,80 @@ class _ArtisticInputState extends State<ArtisticInput> {
   final AudioAnalysisApi _api = AudioAnalysisApi();
 
   Future<void> startProcess() async {
-    debugPrint('Starting analysis process...');
-    debugPrint('Selected file name: ${widget.selectedFile.name}');
-    debugPrint('Selected file size: ${widget.selectedFile.size}');
-    debugPrint('DAW: ${widget.daw}');
-    debugPrint('Instruments: ${widget.instruments}');
-    debugPrint('Feeling: $feeling');
+  debugPrint('Starting analysis process...');
+  debugPrint('Selected file name: ${widget.selectedFile.name}');
+  debugPrint('Selected file size: ${widget.selectedFile.size}');
+  debugPrint('Selected file has bytes: ${widget.selectedFile.bytes != null}');
+  debugPrint('Running on web: $kIsWeb');
+  debugPrint('DAW: ${widget.daw}');
+  debugPrint('Instruments: ${widget.instruments}');
+  debugPrint('Feeling: $feeling');
 
-    if (widget.selectedFile.bytes == null) {
-      setState(() {
-        _errorMessage = 'Nessun file valido selezionato.';
-      });
+  if (!kIsWeb) {
+    debugPrint('Selected file path: ${widget.selectedFile.path}');
+  }
+
+  final bool isFileValid = kIsWeb
+      ? widget.selectedFile.bytes != null
+      : widget.selectedFile.bytes != null || widget.selectedFile.path != null;
+
+  if (!isFileValid) {
+    setState(() {
+      _errorMessage = 'Nessun file valido selezionato.';
+    });
+
+    return;
+  }
+
+  setState(() {
+    _isLoading = true;
+    _errorMessage = null;
+  });
+
+  try {
+    final responseData = await _api.analyzeFile(
+      widget.selectedFile,
+      widget.daw,
+      widget.instruments,
+      feeling,
+    );
+
+    if (!mounted) {
       return;
     }
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      _isLoading = false;
     });
 
-    try {
-      final responseData = await _api.analyzeFile(
-        widget.selectedFile,
-        widget.daw,
-        feeling,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AnalysisResultScreen(
-            responseData: responseData,
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AnalysisResultScreen(
+          responseData: responseData,
         ),
-      );
-    } catch (e) {
-      debugPrint('Errore analisi: $e');
+      ),
+    );
+  } catch (e) {
+    debugPrint('Errore analisi: $e');
 
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Errore durante l\'analisi del file.';
-      });
+    if (e is DioException) {
+      debugPrint('Dio error type: ${e.type}');
+      debugPrint('Dio error message: ${e.message}');
+      debugPrint('Dio status code: ${e.response?.statusCode}');
+      debugPrint('Dio response data: ${e.response?.data}');
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = false;
+      _errorMessage = 'Errore durante l\'analisi del file.';
+    });
   }
+}
 
   void createFeelingMap() {
     feeling = {
